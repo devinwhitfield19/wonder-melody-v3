@@ -38,18 +38,57 @@ void WonderMelodyGeneratorAudioProcessorEditor::timerCallback()
  else status.setText(processor.getAiStatus(),juce::dontSendNotification);
  for(int i=0;i<16;++i)drumButtons[i].setToggleState(processor.getDrumStep(i),juce::dontSendNotification);
 }
+
 void WonderMelodyGeneratorAudioProcessorEditor::paint(juce::Graphics& g)
 {
- g.fillAll(juce::Colour(0xff080d17));g.setColour(juce::Colour(0xff111c2c));g.fillRoundedRectangle(16,55,928,155,12);
- g.setColour(juce::Colour(0xff273650));g.drawRoundedRectangle(16,55,928,155,12,1);
- g.setColour(juce::Colour(0xffce5cff));g.setFont(14.0f);g.drawText("MELODY PIANO ROLL PREVIEW",28,220,400,22,juce::Justification::left);
- juce::Rectangle<float> r(28,246,900,88);g.setColour(juce::Colour(0xff0c1422));g.fillRoundedRectangle(r,6);
- for(int i=0;i<=32;++i){g.setColour(juce::Colour(0xff26334a));g.drawVerticalLine(28+i*28,246,334);}
- const auto& notes=processor.getMelody();
- for(int i=0;i<32;++i)if(notes[(size_t)i]>=0){float y=326-(notes[(size_t)i]-48)*2.4f;y=juce::jlimit(248.0f,322.0f,y);g.setColour(juce::Colour(0xffce5cff));g.fillRoundedRectangle(30+i*28,y,20,7,2);}
- g.setColour(juce::Colour(0xff94a3bd));g.setFont(12.0f);g.drawText("DRUM PATTERN — click steps to toggle",28,345,500,20);
- g.drawText("SYNTH: dual oscillators • low-pass filter • attack/release envelope • 4 presets",28,425,850,20);
- g.drawText("AI uses a local Python bridge; prompts are sent to the configured model when requested.",28,540,850,20);
+    g.fillAll(juce::Colour(0xff080d17));
+    g.setColour(juce::Colour(0xff111c2c));
+    g.fillRoundedRectangle(16, 55, 928, 155, 12);
+    g.setColour(juce::Colour(0xff273650));
+    g.drawRoundedRectangle(16, 55, 928, 155, 12, 1);
+
+    g.setColour(juce::Colour(0xffce5cff));
+    g.setFont(14.0f);
+    g.drawText("MELODY PIANO ROLL PREVIEW",
+               juce::Rectangle<int>(28, 220, 400, 22),
+               juce::Justification::left);
+
+    juce::Rectangle<float> r(28, 246, 900, 88);
+    g.setColour(juce::Colour(0xff0c1422));
+    g.fillRoundedRectangle(r, 6);
+
+    for (int i = 0; i <= 32; ++i)
+    {
+        g.setColour(juce::Colour(0xff26334a));
+        g.drawVerticalLine(28 + i * 28, 246, 334);
+    }
+
+    const auto& notes = processor.getMelody();
+    for (int i = 0; i < 32; ++i)
+    {
+        if (notes[(size_t)i] >= 0)
+        {
+            float y = 326 - (notes[(size_t)i] - 48) * 2.4f;
+            y = juce::jlimit(248.0f, 322.0f, y);
+            g.setColour(juce::Colour(0xffce5cff));
+            g.fillRoundedRectangle(30 + i * 28, y, 20, 7, 2);
+        }
+    }
+
+    g.setColour(juce::Colour(0xff94a3bd));
+    g.setFont(12.0f);
+    g.drawText("DRUM PATTERN — click steps to toggle",
+               juce::Rectangle<int>(28, 345, 500, 20),
+               juce::Justification::left);
+
+    g.drawText("SYNTH: dual oscillators - low-pass filter - attack/release envelope - 4 presets",
+               juce::Rectangle<int>(28, 425, 850, 20),
+               juce::Justification::left);
+
+    g.drawText("AI uses a local Python bridge; prompts are sent to the configured model when requested.",
+               juce::Rectangle<int>(28, 540, 850, 20),
+               juce::Justification::left);
+}
 }
 void WonderMelodyGeneratorAudioProcessorEditor::resized()
 {
@@ -63,9 +102,34 @@ void WonderMelodyGeneratorAudioProcessorEditor::resized()
  promptEditor.setBounds(28,465,560,52);endpointEditor.setBounds(610,465,315,28);aiButton.setBounds(610,500,315,34);
  status.setBounds(28,600,900,34);
 }
+
 void WonderMelodyGeneratorAudioProcessorEditor::exportMidi()
 {
- juce::FileChooser fc("Export four-track MIDI",juce::File::getSpecialLocation(juce::File::userDocumentsDirectory),"*.mid");
- if(!fc.browseForFileToSave(true))return;auto f=fc.getResult();if(!f.hasFileExtension("mid"))f=f.withFileExtension("mid");
- processor.exportAllMidi(f);status.setText("Exported four MIDI tracks: Melody, Chords, Bass, Drums.",juce::dontSendNotification);
+    auto midiFile = juce::File::getSpecialLocation(
+        juce::File::userDocumentsDirectory).getChildFile("WonderMelody.mid");
+
+    auto chooser = std::make_shared<juce::FileChooser>(
+        "Export four-track MIDI",
+        midiFile,
+        "*.mid");
+
+    chooser->launchAsync(
+        juce::FileBrowserComponent::saveMode
+            | juce::FileBrowserComponent::canSelectFiles,
+        [this, chooser](const juce::FileChooser& fc)
+        {
+            auto file = fc.getResult();
+
+            if (file == juce::File{})
+                return;
+
+            if (!file.hasFileExtension("mid"))
+                file = file.withFileExtension("mid");
+
+            processor.exportAllMidi(file);
+            status.setText(
+                "Exported four MIDI tracks: Melody, Chords, Bass, Drums.",
+                juce::dontSendNotification);
+        });
+}
 }
