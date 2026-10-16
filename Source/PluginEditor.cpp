@@ -89,7 +89,7 @@ void WonderMelodyGeneratorAudioProcessorEditor::paint(juce::Graphics& g)
                juce::Rectangle<int>(28, 540, 850, 20),
                juce::Justification::left);
 }
-}
+
 void WonderMelodyGeneratorAudioProcessorEditor::resized()
 {
  title.setBounds(22,10,800,36);
@@ -131,5 +131,4 @@ void WonderMelodyGeneratorAudioProcessorEditor::exportMidi()
                 "Exported four MIDI tracks: Melody, Chords, Bass, Drums.",
                 juce::dontSendNotification);
         });
-}
 }
