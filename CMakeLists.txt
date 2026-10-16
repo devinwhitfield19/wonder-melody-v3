@@ -17,6 +17,7 @@ juce_add_plugin(WonderMelodyGenerator
 target_sources(WonderMelodyGenerator PRIVATE
   Source/PluginProcessor.cpp Source/PluginProcessor.h
   Source/PluginEditor.cpp Source/PluginEditor.h)
+  juce_generate_juce_header(WonderMelodyGenerator)
 target_compile_features(WonderMelodyGenerator PRIVATE cxx_std_17)
 target_compile_definitions(WonderMelodyGenerator PUBLIC JUCE_WEB_BROWSER=0 JUCE_USE_CURL=0 JUCE_VST3_CAN_REPLACE_VST2=0)
 target_link_libraries(WonderMelodyGenerator PRIVATE
