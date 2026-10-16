@@ -1,0 +1,33 @@
+name: Build Windows VST3
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Check out Wonder Melody Generator
+        uses: actions/checkout@v4
+
+      - name: Check out JUCE
+        uses: actions/checkout@v4
+        with:
+          repository: juce-framework/JUCE
+          ref: 8.0.6
+          path: JUCE
+          submodules: recursive
+
+      - name: Configure
+        run: cmake -S . -B build -DJUCE_DIR="${{ github.workspace }}/JUCE" -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build VST3
+        run: cmake --build build --config Release --target WonderMelodyGenerator_VST3 --parallel
+
+      - name: Upload VST3 bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Wonder-Melody-Generator-Windows-VST3
+          path: build/WonderMelodyGenerator_artefacts/Release/VST3/
+          if-no-files-found: error
+          retention-days: 7
